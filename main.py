@@ -6,7 +6,7 @@ import math
 #import sys, csv
 from google.cloud import bigquery
 
-def make_api_call(apikey, url, debug = False, allowErrors = False):
+def make_api_call(apikey, url, debug = False, allowErrors = True):
     headers = {
         'Content-type': 'application/json',
         'Fastly-Key': apikey
@@ -86,6 +86,9 @@ def main(request):
     print("------------------------Calculating data from {} to {}------------------------".format(start_date.strftime("%Y-%m-%d"), end_date.strftime("%Y-%m-%d")))
     rows_to_insert = []
     for sid in final_results:
+        if services[sid] == []:
+            print("Skipping sid {} which has no data".format(sid))
+            continue
         print("{} ({}) [{}] - {} ({:,} requests) - {}%".format(services[sid]['name'], sid, services[sid]['type'], convert_size(final_results[sid]['bandwidth']), final_results[sid]['requests'], round(100 * (final_results[sid]['bandwidth'] / total_bytes_delivered), 4)))
         rows_to_insert.append({
             "date": end_date.strftime('%Y-%m-%d'), 
